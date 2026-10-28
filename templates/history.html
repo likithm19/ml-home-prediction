@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prediction History</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 30px;
+        font-family: Arial, sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: auto;
+      }
+
+      h1 {
+        color: #1d4ed8;
+      }
+
+      .navigation {
+        margin: 20px 0;
+      }
+
+      .button {
+        display: inline-block;
+        margin: 0 8px 8px 0;
+        padding: 11px 16px;
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 3px 12px #0000000d;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      th {
+        background: #dbeafe;
+      }
+
+      tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      .empty {
+        padding: 25px;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="container">
+      <h1>Prediction History</h1>
+
+      <p>View your previously generated house price predictions.</p>
+
+      <nav class="navigation">
+        <a href="/" class="button">Home</a>
+        <a href="/model" class="button">New Prediction</a>
+        <a href="/comparison" class="button">Model Comparison</a>
+      </nav>
+
+      <section class="card">
+        {% if predictions %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date &amp; Time (UTC)</th>
+                <th>Model</th>
+                <th>Income</th>
+                <th>House Age</th>
+                <th>Rooms</th>
+                <th>Bedrooms</th>
+                <th>Population</th>
+                <th>Predicted Price</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for item in predictions %}
+              <tr>
+                <td>{{ item["id"] }}</td>
+                <td>{{ item["created_at"] }}</td>
+                <td>{{ item["model_name"] }}</td>
+                <td>{{ "{:,.2f}".format(item["income"]) }}</td>
+                <td>{{ "{:,.2f}".format(item["house_age"]) }}</td>
+                <td>{{ "{:,.2f}".format(item["rooms"]) }}</td>
+                <td>{{ "{:,.2f}".format(item["bedrooms"]) }}</td>
+                <td>{{ "{:,.2f}".format(item["population"]) }}</td>
+                <td>${{ "{:,.2f}".format(item["predicted_price"]) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty">
+          <h3>No predictions yet</h3>
+          <p>Your predictions will appear here after you make one.</p>
+          <a href="/model" class="button">Predict a House Price</a>
+        </div>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

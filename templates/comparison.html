@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Model Comparison | USA Housing ML</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f7fb;
+        color: #1e293b;
+      }
+
+      nav {
+        background: #14213d;
+        color: white;
+        padding: 18px 6%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        margin-left: 16px;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+
+      .card {
+        background: white;
+        padding: 24px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px #14213d0d;
+      }
+
+      .summary {
+        border-left: 5px solid #16a34a;
+      }
+
+      .metric {
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      .best-model {
+        font-size: 25px;
+        font-weight: bold;
+        color: #15803d;
+      }
+
+      .charts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+        gap: 20px;
+      }
+
+      .chart-card {
+        min-width: 0;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 14px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      th {
+        background: #eef2ff;
+      }
+
+      .button {
+        display: inline-block;
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        padding: 11px 16px;
+        border-radius: 8px;
+        margin: 4px 6px 4px 0;
+      }
+
+      .error {
+        color: #b91c1c;
+        background: #fee2e2;
+        padding: 14px;
+        border-radius: 8px;
+      }
+
+      footer {
+        text-align: center;
+        padding: 24px;
+        color: #64748b;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav>
+      <strong>USA Housing ML</strong>
+
+      <div>
+        <a href="/">Home</a>
+        <a href="/model">Predict</a>
+        <a href="/comparison">Model Comparison</a>
+      </div>
+    </nav>
+
+    <main>
+      <h1>Model Comparison Dashboard</h1>
+      <p>
+        Compare the performance of your trained housing price prediction models.
+      </p>
+
+      {% if error %}
+      <div class="error">{{ error }}</div>
+      {% else %} {% if best_model and best_metric %}
+      <section class="card summary">
+        <p class="metric">Best model by {{ best_metric.name }}</p>
+
+        <div class="best-model">{{ best_model }}</div>
+
+        <p>{{ best_metric.name }}: {{ "%.4f"|format(best_metric.value) }}</p>
+
+        <p class="metric">{{ best_metric.rule }}</p>
+      </section>
+      {% endif %}
+
+      <section class="charts">
+        {% for chart in charts %}
+        <div class="card chart-card">
+          <h2>{{ chart.metric }}</h2>
+
+          <div class="chart-container">
+            <canvas id="chart-{{ loop.index }}"></canvas>
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+
+      <section class="card">
+        <h2>Model Performance Results</h2>
+
+        {% if rows %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                {% for col in columns %}
+                <th>{{ col }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for row in rows %}
+              <tr>
+                {% for col in columns %}
+                <td>{{ row[col] if row[col] is not none else "—" }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No model results are available.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      <a class="button" href="/model">Predict House Price</a>
+      <a class="button" href="/">Back to Home</a>
+    </main>
+
+    <footer>USA Housing Price Prediction · Machine Learning Dashboard</footer>
+
+    <script>
+      const charts = {{ charts | tojson }};
+
+      charts.forEach((item, index) => {
+          const canvas = document.getElementById(`chart-${index + 1}`);
+
+          if (!canvas) return;
+
+          new Chart(canvas, {
+              type: "bar",
+              data: {
+                  labels: item.labels,
+                  datasets: [{
+                      label: item.metric,
+                      data: item.values,
+                      backgroundColor: "#3b82f6",
+                      borderRadius: 5
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      legend: {
+                          display: false
+                      }
+                  },
+                  scales: {
+                      y: {
+                          beginAtZero: true
+                      },
+                      x: {
+                          ticks: {
+                              maxRotation: 45,
+                              minRotation: 0
+                          }
+                      }
+                  }
+              }
+          });
+      });
+    </script>
+  </body>
+</html>
